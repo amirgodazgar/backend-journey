@@ -13,6 +13,7 @@ const server = createServer((req, res) => {
         { id: 2, title: "Pen" },
       ]),
     );
+    
   } else if (req.url === "/update" && req.method === "POST") {
     let body = "";
 
