@@ -37,9 +37,11 @@ const server = createServer((req, res) => {
     // * Listen for the end of the request body ('all chunks' have been received)
     req.on("end", () => {
       try {
-        const responseBody = JSON.parse(body);
+        const parsed = JSON.parse(body);
+        const newItem = { id: products.length + 1, ...parsed };
+        products.push(newItem);
         res.writeHead(201, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(responseBody));
+        res.end(JSON.stringify(newItem));
       } catch (error) {
         console.log("Error in server");
         res.writeHead(400, { "Content-Type": "application/json" });
