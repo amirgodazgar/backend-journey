@@ -1,11 +1,11 @@
 import { createServer } from "node:http";
-
-const products = [
-  { id: 1, title: "Book" },
-  { id: 2, title: "Pen" },
-  { id: 3, title: "Eraser" },
-  { id: 4, title: "Notebook" },
-];
+import {
+  addProduct,
+  deleteProduct,
+  getProduct,
+  getProducts,
+  updateProduct,
+} from "./routes/products.route";
 
 const HOST_NAME = "127.0.0.1";
 const PORT = 3000;
@@ -16,38 +16,15 @@ const server = createServer((req, res) => {
   const match = url.pathname.match(/^\/products\/(\d+)$/);
 
   if (url.pathname === "/products" && method === "GET") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(products));
+    getProducts({ res });
   } else if (match && method === "GET") {
-    const id = Number(match[1]);
-    const item = products.find((i) => i.id === id);
-    if (!item) {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Product not found" }));
-      return; //* ← important: stop execution
-    }
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(item));
+    getProduct({ res, match });
   } else if (url.pathname === "/products" && method === "POST") {
-    let body = "";
-    //* Listen for 'first chunk' of data to be received from the request body
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-    // * Listen for the end of the request body ('all chunks' have been received)
-    req.on("end", () => {
-      try {
-        const parsed = JSON.parse(body);
-        const newItem = { id: products.length + 1, ...parsed };
-        products.push(newItem);
-        res.writeHead(201, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(newItem));
-      } catch (error) {
-        console.log("Error in server");
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ message: "Invalid JSON" }));
-      }
-    });
+    addProduct({ res });
+  } else if (match && method === "PUT") {
+    updateProduct({ req, res, match });
+  } else if (match && method === "DELETE") {
+    deleteProduct({ res, match });
   } else {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ data: "Not Found" }));
